@@ -96,6 +96,7 @@ static const uint8_t BYTES_PER_LOOP = 120;
 
 // setup()
 void ThermalPrinterDisplay::setup() {
+  ESP_LOGD(TAG, "entering setup()");
   this->init_internal_(this->get_buffer_length_());
 
   this->begin();
@@ -105,7 +106,7 @@ void ThermalPrinterDisplay::setup() {
   this->setLineHeight(row_spacing);
 
   this->feed(1);
-
+  ESP_LOGD(TAG, "leaving setup()");
   // old stuff from jesse's component
   //  this->write_array(BAUD_RATE_115200_CMD, sizeof(BAUD_RATE_115200_CMD));
   //  delay(10);
@@ -118,6 +119,7 @@ void ThermalPrinterDisplay::setup() {
 
 // maps to Adafruit_Thermal::begin()
 void ThermalPrinterDisplay::begin() {
+  ESP_LOGD(TAG, "entering begin()");
   firmware = version;
   // The printer can't start receiving data immediately upon power up --
   // it needs a moment to cold boot and initialize.  Allow at least 1/2
@@ -139,16 +141,20 @@ void ThermalPrinterDisplay::begin() {
   dotPrintTime = 30000;  // See comments near top of file for
   dotFeedTime = 2100;    // an explanation of these values.
   maxChunkHeight = 255;
+  ESP_LOGD(TAG, "leaving begin()");
 }
 
 // This method sets the estimated completion time for a just-issued task.
 void ThermalPrinterDisplay::timeoutSet(unsigned long x) {
+  ESP_LOGD(TAG, "entering timeoutSet()");
   if (!dtrEnabled)
     resumeTime = micros() + x;
+  ESP_LOGD(TAG, "leaving timeoutSet()");
 }
 
 // Wake the printer from a low-energy state.
 void ThermalPrinterDisplay::wake() {
+  ESP_LOGD(TAG, "entering wake()");
   timeoutSet(0);          // Reset timeout counter
   this->write_byte(255);  // Wake
   if (firmware >= 264) {
@@ -165,11 +171,17 @@ void ThermalPrinterDisplay::wake() {
       timeoutSet(10000L);
     }
   }
+  ESP_LOGD(TAG, "leaving wake()");
 }
 
-void ThermalPrinterDisplay::init_() { this->write_array(INIT_CMD, sizeof(INIT_CMD)); }
+void ThermalPrinterDisplay::init_() {
+  ESP_LOGD(TAG, "entering init_()");
+  this->write_array(INIT_CMD, sizeof(INIT_CMD));
+}
+
 // Reset printer to default state.
 void ThermalPrinterDisplay::reset() {
+  ESP_LOGD(TAG, "entering reset()");
   // Init command
   this->init_();
   prevByte = '\n';  // Treat as if prior line is blank
@@ -185,6 +197,7 @@ void ThermalPrinterDisplay::reset() {
     this->write_array(TAB_STOP_CMD_4_COLS, sizeof(TAB_STOP_CMD_4_COLS));  // ...every 4 columns,
     this->write_array(TAB_STOP_CMD_STOP, sizeof(TAB_STOP_CMD_STOP));      // 0 marks end-of-list.
   }
+  ESP_LOGD(TAG, "leaving reset()");
 }
 
 // ESC 7 n1 n2 n3 Setting Control Parameter Command
@@ -205,14 +218,17 @@ void ThermalPrinterDisplay::reset() {
 // possibly paper 'stiction'.  More heating interval = clearer print,
 // but slower printing speed.
 void ThermalPrinterDisplay::setHeatConfig(uint8_t dots, uint8_t time, uint8_t interval) {
+  ESP_LOGD(TAG, "entering setHeatConfig()");
   this->write_array(PRINT_SETTINGS_CMD, sizeof(PRINT_SETTINGS_CMD));  // Esc 7 (print settings)
   this->write_byte(dots);
   this->write_byte(time);
   this->write_byte(interval);  // Heating dots, heat time, heat interval
+  ESP_LOGD(TAG, "leaving setHeatConfig()");
 }
 
 // Reset text formatting parameters.
 void ThermalPrinterDisplay::setDefault() {
+  ESP_LOGD(TAG, "entering setDefault()");
   this->online();
   this->justify('L');
   this->inverseOff();
@@ -224,6 +240,7 @@ void ThermalPrinterDisplay::setDefault() {
   this->setSize('s');
   this->setCharset();
   this->setCodePage();
+  ESP_LOGD(TAG, "leaving setDefault()");
 }
 
 // Take the printer back online. Subsequent print commands will be obeyed.
@@ -344,6 +361,7 @@ void ThermalPrinterDisplay::setCodePage(uint8_t val) {
 
 // Feeds by the specified number of lines
 void ThermalPrinterDisplay::feed(uint8_t x) {
+  ESP_LOGD(TAG, "entering feed()");
   if (firmware >= 264) {
     uint8_t feed_arr[] = {ASCII_ESC, 'd', x};
     this->write_array(feed_arr, sizeof(feed_arr));
@@ -354,6 +372,7 @@ void ThermalPrinterDisplay::feed(uint8_t x) {
     while (x--)
       write('\n');  // Feed manually; old firmware feeds excess lines
   }
+  ESP_LOGD(TAG, "leaving feed()");
 }
 void ThermalPrinterDisplay::setPrintMode(uint8_t mask) {
   printMode |= mask;
@@ -379,6 +398,7 @@ void ThermalPrinterDisplay::writePrintMode() {
 // The underlying method for all high-level printing (e.g. println()).
 // The inherited Print class handles the rest!
 size_t ThermalPrinterDisplay::write(uint8_t c) {
+  ESP_LOGD(TAG, "entering write()");
   if (c != 13) {  // Strip carriage returns
     timeoutWait();
     char str[2] = {static_cast<char>(c), '\0'};
@@ -395,7 +415,7 @@ size_t ThermalPrinterDisplay::write(uint8_t c) {
     timeoutSet(d);
     prevByte = c;
   }
-
+  ESP_LOGD(TAG, "leaving write()");
   return 1;
 }
 
@@ -437,6 +457,7 @@ void ThermalPrinterDisplay::adjustCharValues(uint8_t printMode) {
 
 //---stuff from Jesse's m5stack_printer component
 void ThermalPrinterDisplay::print_text(std::string text, uint8_t font_size) {
+  ESP_LOGD(TAG, "entering print_text()");
   this->init_();
   /*font_size = clamp<uint8_t>(font_size, 0, 7);
   this->write_array(FONT_SIZE_CMD, sizeof(FONT_SIZE_CMD));
@@ -445,6 +466,7 @@ void ThermalPrinterDisplay::print_text(std::string text, uint8_t font_size) {
   for (char c : text) {
     this->write(static_cast<uint8_t>(c));
   }
+  ESP_LOGD(TAG, "leaving print_text()");
 
   /*this->write_array(FONT_SIZE_RESET_CMD, sizeof(FONT_SIZE_RESET_CMD));*/
 }
