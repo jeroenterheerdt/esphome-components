@@ -12,8 +12,8 @@ ThermalPrinterDisplay = thermal_printer_ns.class_(
     "ThermalPrinterDisplay", display.DisplayBuffer, uart.UARTDevice
 )
 
-ThermalPrinterDisplayPrintTextAction = thermal_printer_ns.class_(
-    "ThermalPrinterDisplayPrintTextAction", automation.Action
+ThermalPrinterPrintTextAction = thermal_printer_ns.class_(
+    "ThermalPrinterPrintTextAction", automation.Action
 )
 
 CONF_FONT_SIZE = "font_size"
@@ -49,7 +49,7 @@ async def to_code(config):
 
 @automation.register_action(
     "thermal_printer.print_text",
-    ThermalPrinterDisplayPrintTextAction,
+    ThermalPrinterPrintTextAction,
     cv.maybe_simple_value(
         cv.Schema(
             {
