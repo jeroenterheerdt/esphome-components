@@ -167,10 +167,11 @@ void ThermalPrinterDisplay::wake() {
   }
 }
 
+void ThermalPrinterDisplay::init_() { this->write_array(INIT_CMD, sizeof(INIT_CMD)); }
 // Reset printer to default state.
 void ThermalPrinterDisplay::reset() {
   // Init command
-  this->write_array(INIT_CMD, sizeof(INIT_CMD));
+  this->init_();
   prevByte = '\n';  // Treat as if prior line is blank
   column = 0;
   maxColumn = 32;
