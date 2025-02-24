@@ -48,7 +48,7 @@ async def to_code(config):
 
 
 @automation.register_action(
-    "thermal_printer_ns.print_text",
+    "thermal_printer.print_text",
     ThermalPrinterDisplayPrintTextAction,
     cv.maybe_simple_value(
         cv.Schema(
@@ -63,7 +63,7 @@ async def to_code(config):
         key=CONF_TEXT,
     ),
 )
-async def thermal_printer_ns_print_text_action_to_code(
+async def thermal_printer_print_text_action_to_code(
     config, action_id, template_arg, args
 ):
     var = cg.new_Pvariable(action_id, template_arg)

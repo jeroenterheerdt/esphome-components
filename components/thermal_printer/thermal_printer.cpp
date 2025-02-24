@@ -454,6 +454,7 @@ void ThermalPrinterDisplay::new_line(uint8_t lines) {
   }
 }
 
+// this doesn't work yet
 void ThermalPrinterDisplay::print_qrcode(std::string data) {
   this->init_();
 
@@ -475,6 +476,7 @@ void ThermalPrinterDisplay::print_qrcode(std::string data) {
   */
 }
 
+// this doesn't work yet
 void ThermalPrinterDisplay::print_barcode(std::string barcode, BarcodeType type) {
   this->init_();
 
@@ -489,12 +491,14 @@ void ThermalPrinterDisplay::print_barcode(std::string barcode, BarcodeType type)
   this->write_array(BARCODE_DISABLE_CMD, sizeof(BARCODE_DISABLE_CMD));*/
 }
 
+// this doesn't work yet
 void ThermalPrinterDisplay::queue_data_(std::vector<uint8_t> data) {
   /*for (size_t i = 0; i < data.size(); i += BYTES_PER_LOOP) {
     std::vector<uint8_t> chunk(data.begin() + i, data.begin() + std::min(i + BYTES_PER_LOOP, data.size()));
     this->queue_.push(chunk);
   }*/
 }
+// this doesn't work yet
 void ThermalPrinterDisplay::queue_data_(const uint8_t *data, size_t size) {
   /*for (size_t i = 0; i < size; i += BYTES_PER_LOOP) {
     size_t chunk_size = std::min(i + BYTES_PER_LOOP, size) - i;
