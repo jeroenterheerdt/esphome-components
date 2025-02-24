@@ -30,7 +30,34 @@ class ThermalPrinterDisplay : public display::DisplayBuffer, public uart::UARTDe
   void loop() override;
   void update() override;
 
+  void begin();
+  void timeoutSet(unsigned long x);
+  void wake();
+  void reset();
+  void setHeatConfig(uint8_t dots = 11, uint8_t time = 120, uint8_t interval = 40);
+  void setDefault();
+  void online();
+  void justify(char value);
+  void inverseOff();
+  void doubleHeightOn();
+  void doubleHeightOff();
+  void doubleWidthOn();
+  void doubleWidthOff();
+  void strikeOn();
+  void strikeOff();
+  void boldOn();
+  void boldOff();
+  void setLineHeight(int val);
+  void underlineOff();
+  void setBarcodeHeight(uint8_t val = 50);
+  void setSize(char value);
+  void setCharset(uint8_t val = 0);
+  void setCodePage(uint8_t val = 0);
+  void feed(uint8_t x);
+  void timeoutWait();
   void write_to_device_();
+
+  size_t write(uint8_t c);
 
   // Display buffer
   int get_width_internal() override { return 8 * 58; };  // 58mm, 8 dots per mm
@@ -55,6 +82,23 @@ class ThermalPrinterDisplay : public display::DisplayBuffer, public uart::UARTDe
 
   std::queue<std::vector<uint8_t>> queue_{};
   int height_{0};
+
+ private:
+  uint8_t printMode,
+      prevByte,       // Last character issued to printer
+      column,         // Last horizontal column printed
+      maxColumn,      // Page width (output 'wraps' at this point)
+      charHeight,     // Height of characters, in 'dots'
+      lineSpacing,    // Inter-line spacing (not line height), in dots
+      barcodeHeight,  // Barcode height in dots, not including text
+      maxChunkHeight,
+      dtrPin;                // DTR handshaking pin (experimental)
+  uint16_t firmware;         // Firmware version
+  bool dtrEnabled;           // True if DTR pin set & printer initialized
+  unsigned long resumeTime,  // Wait until micros() exceeds this before sending byte
+      dotPrintTime,          // Time to print a single dot line, in microseconds
+      dotFeedTime;           // Time to feed a single dot line, in microseconds
+  void setPrintMode(uint8_t mask), unsetPrintMode(uint8_t mask), writePrintMode(), adjustCharValues(uint8_t printMode);
 };
 
 template<typename... Ts>
